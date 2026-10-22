@@ -1,0 +1,261 @@
+---
+// LoopDiagram — static ops-console rendering of the commerce closed loop.
+// Human labels are localized; the mono identifiers (event codes, statuses,
+// ids) are machine readouts and stay fixed in both locales, like the HUD.
+import { getLangFromUrl, useTranslations } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const nodes = [
+  { tag: "PRODUCT", name: t("diagram.n1.name"), gate: null },
+  { tag: "CONTENT", name: t("diagram.n2.name"), gate: null },
+  { tag: "LISTING", name: t("diagram.n3.name"), gate: t("diagram.gateD3") },
+  { tag: "ORDER", name: t("diagram.n4.name"), gate: null },
+  { tag: "REFUND", name: t("diagram.n5.name"), gate: t("diagram.gateD2") },
+];
+---
+
+<div class="diagram">
+  <!-- decision kernel rail -->
+  <div class="diagram__rail zeus">
+    <div class="diagram__rail-head">
+      <span class="led" data-c="power" aria-hidden="true"></span>
+      <span class="diagram__rail-title">{t("diagram.zeus")}</span>
+      <span class="diagram__rail-sub">{t("diagram.zeusSub")}</span>
+    </div>
+    <div class="diagram__codes">
+      <div class="diagram__code"><i class="dot" data-c="power"></i><code>D3 publish&nbsp;&nbsp;HELD 423 → APPROVED → channel.upsert</code></div>
+      <div class="diagram__code"><i class="dot" data-c="power"></i><code>D2 refund&nbsp;&nbsp;&nbsp;HELD 423 → APPROVED → channel.refund</code></div>
+      <div class="diagram__code"><i class="dot" data-c="alert"></i><code>kernel down&nbsp;&nbsp;503 DECISION_UNAVAILABLE · fail-closed</code></div>
+    </div>
+  </div>
+
+  <!-- the conveyor -->
+  <div class="diagram__flow" role="img" aria-label="product → content → listing → order → refund">
+    {nodes.map((n, i) => (
+      <div class="diagram__node-wrap">
+        <div class="diagram__node">
+          {n.gate && (
+            <span class="diagram__gate">
+              <span class="diagram__gate-led" aria-hidden="true"></span>
+              {n.gate}
+            </span>
+          )}
+          <span class="diagram__tag">{n.tag}</span>
+          <span class="diagram__name">{n.name}</span>
+          <span class="diagram__pip" aria-hidden="true"></span>
+        </div>
+        {i < nodes.length - 1 && (
+          <svg class="diagram__arrow" width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+            <path d="M0 8h18m-5-5 5 5-5 5" stroke="var(--data)" stroke-width="1.6" />
+          </svg>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <!-- channel + audit rails -->
+  <div class="diagram__bottom">
+    <div class="diagram__rail channel">
+      <div class="diagram__rail-head">
+        <span class="led" data-c="plasma" aria-hidden="true"></span>
+        <span class="diagram__rail-title">{t("diagram.channel")}</span>
+        <span class="diagram__rail-sub">{t("diagram.channelSub")}</span>
+      </div>
+      <div class="diagram__codes">
+        <div class="diagram__code"><i class="dot" data-c="ok"></i><code>sandbox-douyin&nbsp;&nbsp;ONLINE · offline replay</code></div>
+        <div class="diagram__code"><i class="dot" data-c="alert"></i><code>douyin live&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FAIL-CLOSED · 422 CREDENTIAL_MISSING</code></div>
+      </div>
+    </div>
+
+    <div class="diagram__rail audit">
+      <div class="diagram__rail-head">
+        <span class="led" data-c="data" aria-hidden="true"></span>
+        <span class="diagram__rail-title">{t("diagram.audit")}</span>
+        <span class="diagram__rail-sub">{t("diagram.auditSub")}</span>
+      </div>
+      <div class="diagram__codes">
+        <div class="diagram__code"><code>listing.published&nbsp;&nbsp;decision=D3 sku=SKU-DEMO-001</code></div>
+        <div class="diagram__code"><code>order.imported&nbsp;&nbsp;&nbsp;&nbsp;ext=DY-SB-20261022-0001 1299 CNY idempotent=hit</code></div>
+        <div class="diagram__code"><code>refund.succeeded&nbsp;&nbsp;&nbsp;decision=D2 ref=DY-SB-REFUND-5001</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .diagram__rail {
+    border: 1px solid var(--steel-600);
+    background: var(--steel-900);
+    box-shadow: var(--bevel-deep);
+  }
+  .diagram__rail-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px dashed var(--steel-600);
+  }
+  .diagram__rail-title {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+  }
+  .diagram__rail-sub {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .diagram__codes {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 12px 10px;
+  }
+  .diagram__code {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .diagram__code code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+  .diagram__code .dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 8px currentColor;
+    color: var(--ok);
+  }
+  .diagram__code .dot[data-c="power"] { background: var(--power); color: var(--power); }
+  .diagram__code .dot[data-c="alert"] { background: var(--alert); color: var(--alert); }
+  .diagram__zeus { border-color: var(--power-dim); }
+  .diagram__channel { border-color: var(--data-dim); }
+  .diagram__audit { border-color: var(--steel-600); }
+
+  .diagram__flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    padding: 10px 4px 4px;
+  }
+  .diagram__node-wrap {
+    display: flex;
+    align-items: stretch;
+  }
+  .diagram__node {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 10px 14px;
+    text-align: center;
+    background: linear-gradient(180deg, var(--steel-800), var(--steel-850));
+    border: 1px solid var(--steel-600);
+    border-top: 2px solid var(--data);
+    box-shadow: var(--bevel);
+  }
+  .diagram__tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--data);
+  }
+  .diagram__name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .diagram__node:has(.diagram__gate) {
+    border-top-color: var(--power);
+  }
+  .diagram__gate {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--power);
+    background: var(--steel-900);
+    border: 1px solid var(--power);
+    box-shadow: 0 0 12px -3px var(--power);
+  }
+  .diagram__gate-led {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--power);
+    box-shadow: 0 0 6px var(--power);
+  }
+  .diagram__pip {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: 40%;
+    background: var(--data);
+    box-shadow: 0 0 8px var(--data);
+    animation: sweep 3.2s linear infinite;
+  }
+  .diagram__node-wrap:nth-child(2) .diagram__pip { animation-delay: 0.5s; }
+  .diagram__node-wrap:nth-child(3) .diagram__pip { animation-delay: 1s; }
+  .diagram__node-wrap:nth-child(4) .diagram__pip { animation-delay: 1.5s; }
+  .diagram__node-wrap:nth-child(5) .diagram__pip { animation-delay: 2s; }
+  @keyframes sweep {
+    0% { left: 0; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 60%; opacity: 0; }
+  }
+  .diagram__arrow {
+    align-self: center;
+    flex: none;
+    margin: 0 2px;
+  }
+
+  .diagram__bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 920px) {
+    .diagram__flow {
+      grid-template-columns: none;
+      display: flex;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    .diagram__node-wrap {
+      flex: none;
+    }
+    .diagram__node {
+      width: 132px;
+    }
+    .diagram__bottom {
+      grid-template-columns: 1fr;
+    }
+    .diagram__rail-sub {
+      display: none;
+    }
+  }
+</style>

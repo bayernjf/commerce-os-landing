@@ -1,0 +1,180 @@
+---
+import LoopDiagram from "./LoopDiagram.astro";
+import { getLangFromUrl, useTranslations } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+---
+
+<section class="hero">
+  <div class="shell">
+    <div class="hero__head">
+      <div class="hero__badge">
+        <span class="led" data-c="power" aria-hidden="true"></span>
+        <span>{t("hero.badge")}</span>
+      </div>
+      <h1 class="hero__title">
+        {t("hero.title.line1")}<br />
+        {t("hero.title.pre")}<span class="hero__accent">{t("hero.title.accent")}</span>{t("hero.title.post")}
+      </h1>
+      <p class="hero__sub">{t("hero.sub")}</p>
+      <div class="hero__actions">
+        <a href="#cta" class="btn">
+          {t("hero.cta.primary")}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </a>
+        <a href="#loop" class="btn btn--ghost">{t("hero.cta.secondary")}</a>
+      </div>
+      <div class="hero__meta">
+        <span><b class="readout">1</b> {t("hero.meta.loop")}</span>
+        <span class="hero__dot" aria-hidden="true">·</span>
+        <span><b class="readout">48</b> {t("hero.meta.tests")}</span>
+        <span class="hero__dot" aria-hidden="true">·</span>
+        <span><b class="readout">12</b> {t("hero.meta.routes")}</span>
+      </div>
+    </div>
+
+    <div class="hero__map panel panel--riveted">
+      <div class="panel__bar">
+        <span>{t("hero.map.bar")}</span>
+        <span class="hero__map-status">
+          <span class="led" data-c="plasma" aria-hidden="true"></span>
+          <span class="readout">{t("hero.map.status")}</span>
+        </span>
+      </div>
+      <div class="hero__map-body">
+        <LoopDiagram />
+      </div>
+      <div class="hero__map-foot">
+        <span class="hero__legend"><i style="--c:var(--data)"></i>{t("hero.legend.flow")}</span>
+        <span class="hero__legend"><i style="--c:var(--power)"></i>{t("hero.legend.gate")}</span>
+        <span class="hero__legend"><i style="--c:var(--plasma)"></i>{t("hero.legend.channel")}</span>
+        <span class="hero__legend"><i style="--c:var(--ok)"></i>{t("hero.legend.ok")}</span>
+        <span class="hero__legend"><i style="--c:var(--alert)"></i>{t("hero.legend.alert")}</span>
+        <span class="hero__pan">{t("hero.note")}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 72px 0 88px;
+  }
+  .hero__head {
+    max-width: 820px;
+  }
+  .hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--power);
+    background: rgba(255, 176, 32, 0.07);
+    border: 1px solid rgba(255, 176, 32, 0.28);
+  }
+  .hero__title {
+    margin-top: 22px;
+    font-size: clamp(34px, 6vw, 62px);
+    letter-spacing: -0.02em;
+  }
+  .hero__accent {
+    background: linear-gradient(100deg, var(--data), var(--power));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero__sub {
+    margin-top: 20px;
+    max-width: 62ch;
+    font-size: 16px;
+    color: var(--ink-dim);
+  }
+  .hero__actions {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .hero__meta {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+  }
+  .hero__meta b {
+    color: var(--ink);
+  }
+  .hero__dot {
+    color: var(--steel-500);
+  }
+
+  .hero__map {
+    margin-top: 56px;
+  }
+  .hero__map-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .hero__map-body {
+    padding: 26px 22px 20px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 30%, rgba(53, 224, 240, 0.045), transparent 70%),
+      var(--steel-900);
+    overflow: hidden;
+  }
+  .hero__map-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 11px 16px;
+    border-top: var(--hair);
+    background: var(--steel-850);
+  }
+  .hero__legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+  }
+  .hero__legend i {
+    width: 16px;
+    height: 2px;
+    background: var(--c);
+    box-shadow: 0 0 6px var(--c);
+  }
+
+  .hero__pan {
+    display: none;
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--power);
+  }
+
+  @media (max-width: 1000px) {
+    .hero__pan {
+      display: inline;
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 44px 0 60px; }
+    .hero__map { margin-top: 36px; }
+    .hero__map-body { padding: 16px 10px 12px; }
+    .hero__map-foot { gap: 10px; }
+  }
+</style>
