@@ -1,0 +1,49 @@
+---
+// Sealed-parcel mark inside the family hexagon. Size is set by the caller via
+// the inherited --logo-size custom property — a class from the parent component
+// would not match this root svg, since Astro scopes styles per component.
+---
+
+<svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <path
+    d="M16 1.4 29.8 8.7v14.6L16 30.6 2.2 23.3V8.7z"
+    fill="var(--steel-800)"
+    stroke="var(--steel-400)"
+    stroke-width="2"
+    stroke-linejoin="round"></path>
+  <path
+    d="M16 6.7 24.8 11.35v9.3L16 25.3 7.2 20.65v-9.3z"
+    stroke="var(--data)"
+    stroke-width="1.5"
+    opacity="0.55"></path>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <path
+      d="M10.6 12.2 16 9.4l5.4 2.8-5.4 2.8z"
+      fill="rgba(255,176,32,0.16)"
+      stroke="var(--power)"
+      stroke-width="1.7"></path>
+    <path
+      d="M10.6 12.2v6.4L16 21.4V15z"
+      fill="rgba(255,176,32,0.08)"
+      stroke="var(--power)"
+      stroke-width="1.7"
+      opacity="0.85"></path>
+    <path
+      d="M21.4 12.2v6.4L16 21.4V15z"
+      fill="rgba(255,176,32,0.05)"
+      stroke="var(--power)"
+      stroke-width="1.7"
+      opacity="0.55"></path>
+    <path d="M16 9.4V15" stroke="var(--data)" stroke-width="1.3"></path>
+    <path d="M16 15v6.4" stroke="var(--data)" stroke-width="1.3"></path>
+  </g>
+</svg>
+
+<style>
+  .logo {
+    flex: none;
+    width: var(--logo-size, 22px);
+    height: var(--logo-size, 22px);
+    max-width: none;
+  }
+</style>
