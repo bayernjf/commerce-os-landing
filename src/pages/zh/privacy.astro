@@ -1,0 +1,105 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Hud from "../../components/Hud.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_NAME, SOCIAL } from "../../consts";
+
+const title = `隐私政策 | ${SITE_NAME}`;
+const description = `${SITE_NAME} 隐私政策：我们如何对待与你的访问相关的信息。`;
+---
+
+<Layout title={title} description={description}>
+  <Hud />
+  <main class="doc">
+    <div class="shell">
+      <article class="panel panel--riveted doc__panel">
+        <p class="stencil">隐私政策</p>
+        <h1>隐私政策</h1>
+        <p class="doc__stamp">最后更新：2026 年 10 月 23 日</p>
+
+        <div class="doc__body">
+          <section>
+            <h2>1. 概述</h2>
+            <p>
+              {SITE_NAME}（以下称「本站」）是一个面向开源、自托管软件项目的产品介绍网站。
+              我们尊重并保护访问者的隐私。本政策说明我们如何对待与你的访问相关的信息。
+              使用本站即表示你同意本政策的条款。
+            </p>
+          </section>
+
+          <section>
+            <h2>2. 我们处理的信息</h2>
+            <ul>
+              <li>
+                本站为纯静态站点，不提供账号注册，也没有任何申请或留资表单，因此不收集
+                可识别个人身份的信息。
+              </li>
+              <li>
+                产品本体运行在你自己的基础设施上，只与你配置的通道和决策服务通信；本站
+                不会接触你的店铺凭据、订单、客户数据或 API 密钥。
+              </li>
+              <li>
+                托管平台（Cloudflare Pages）可能在其自身政策下记录基本访问日志（IP、
+                User-Agent 等），这部分不在我们控制范围内。
+              </li>
+              <li>
+                若将来启用统计，仅使用匿名化的使用数据（页面浏览、来源等），绝不用于
+                识别个人身份。
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>3. 产品的沙箱通道</h2>
+            <p>
+              软件的沙箱通道回放的是确定性的离线录制，绝不连接真实网络；不使用任何真实
+              凭据，也不包含真实买家或订单数据。本站展示的样例数字均为预置 fixtures。
+            </p>
+          </section>
+
+          <section>
+            <h2>4. Cookie 与本地存储</h2>
+            <p>
+              本站可能使用浏览器 cookie 或 localStorage 来记住语言等界面偏好。它们仅用于
+              改善浏览体验，绝不用于跨站追踪。你可以在浏览器设置中禁用或清除。
+            </p>
+          </section>
+
+          <section>
+            <h2>5. 第三方链接</h2>
+            <p>
+              本站包含指向 GitHub 等第三方网站的链接。它们的隐私做法不受本政策约束，
+              请参阅其自身政策。
+            </p>
+          </section>
+
+          <section>
+            <h2>6. 未成年人</h2>
+            <p>
+              本站不面向 14 岁以下儿童，我们也不会在知情情况下收集他们的个人信息。
+            </p>
+          </section>
+
+          <section>
+            <h2>7. 变更</h2>
+            <p>
+              本政策可能随产品演进而更新。变更将在本页发布并更新修订日期。
+            </p>
+          </section>
+
+          <section>
+            <h2>8. 联系方式</h2>
+            <p>
+              关于本政策的问题，可在我们的
+              <a href={SOCIAL.github}>GitHub 仓库</a>通过 Issues 提出，或发送邮件至
+              <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>。
+            </p>
+          </section>
+        </div>
+
+        <a class="btn btn--ghost doc__back" href="/zh/">回主控台</a>
+      </article>
+    </div>
+  </main>
+  <Footer />
+</Layout>

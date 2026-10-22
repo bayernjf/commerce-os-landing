@@ -1,0 +1,113 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hud from "../components/Hud.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_NAME, SOCIAL } from "../consts";
+
+const title = `Privacy Policy | ${SITE_NAME}`;
+const description = `Privacy Policy of ${SITE_NAME}: how information related to your visit is handled.`;
+---
+
+<Layout title={title} description={description}>
+  <Hud />
+  <main class="doc">
+    <div class="shell">
+      <article class="panel panel--riveted doc__panel">
+        <p class="stencil">privacy policy</p>
+        <h1>Privacy Policy</h1>
+        <p class="doc__stamp">Last updated: October 23, 2026</p>
+
+        <div class="doc__body">
+          <section>
+            <h2>1. Overview</h2>
+            <p>
+              {SITE_NAME} (the "Site") is a product introduction website for an open-source,
+              self-hosted software project. We respect and protect the privacy of our
+              visitors. This policy explains how information related to your visit is handled.
+              By using the Site you agree to the terms of this policy.
+            </p>
+          </section>
+
+          <section>
+            <h2>2. Information We Handle</h2>
+            <ul>
+              <li>
+                The Site is fully static, offers no account registration and contains no
+                access-request or lead form, so it does not collect personally identifiable
+                information.
+              </li>
+              <li>
+                The product itself runs on your own infrastructure and talks to channels and
+                decision services you configure; this Site never sees your store credentials,
+                orders, customer data or API keys.
+              </li>
+              <li>
+                The hosting platform (Cloudflare Pages) may record basic access logs (IP,
+                User-Agent, etc.) under its own policies, outside our control.
+              </li>
+              <li>
+                If analytics are enabled in the future, only anonymized usage statistics
+                (page views, referrers, etc.) will be used, never to identify individuals.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>3. The Product's Sandbox Channel</h2>
+            <p>
+              The software's sandbox channel replays deterministic, offline recordings and
+              never touches a live network. It uses no real credentials and no real buyer or
+              order data; the sample figures shown on this Site are canned fixtures.
+            </p>
+          </section>
+
+          <section>
+            <h2>4. Cookies &amp; Local Storage</h2>
+            <p>
+              The Site may use browser cookies or localStorage to remember interface
+              preferences such as language. These are used solely to improve browsing and
+              never for cross-site tracking. You can disable or clear them in your browser
+              settings.
+            </p>
+          </section>
+
+          <section>
+            <h2>5. Third-Party Links</h2>
+            <p>
+              The Site links to third-party websites such as GitHub. Their privacy practices
+              are not covered by this policy; please refer to their own policies.
+            </p>
+          </section>
+
+          <section>
+            <h2>6. Children</h2>
+            <p>
+              The Site is not directed at children under 14, and we do not knowingly collect
+              personal information from them.
+            </p>
+          </section>
+
+          <section>
+            <h2>7. Changes</h2>
+            <p>
+              This policy may be updated as the product evolves. Changes will be posted on
+              this page with an updated revision date.
+            </p>
+          </section>
+
+          <section>
+            <h2>8. Contact</h2>
+            <p>
+              Questions about this policy can be raised via Issues on our
+              <a href={SOCIAL.github}>GitHub repository</a>, or by email at
+              <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>.
+            </p>
+          </section>
+        </div>
+
+        <a class="btn btn--ghost doc__back" href="/">Back to console</a>
+      </article>
+    </div>
+  </main>
+  <Footer />
+</Layout>
