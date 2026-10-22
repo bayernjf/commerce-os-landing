@@ -1,0 +1,101 @@
+# Commerce OS
+
+> The minimal self-operated commerce loop (Tier0 family, M3 milestone artifact). Product,
+> content, a decision-gated listing, idempotent order pullback and a refund state machine
+> form one closed loop. Every amount and external move is decided by the zeus kernel over
+> HTTP; channels are pluggable with an offline sandbox first and live channels fail-closed;
+> unbuilt paths return 501 instead of faking success.
+
+- Site: https://commerce-os.bayjf.com (English) · https://commerce-os.bayjf.com/zh/ (简体中文)
+- Source: https://github.com/bayernjf/commerce-os
+- Status: M3 milestone delivered (GATE-M3 passed), 48 tests green; M4 content comes from the
+  loom content base.
+
+## The five stations (one closed loop)
+
+1. **Product on file** — category + SPU/SKU product center; title, price, currency and
+   skuCode uniqueness are validated first.
+2. **Content generated** — M3 uses a deterministic offline content stub (banned-word block,
+   a single review, never auto-confirms); M4 swaps in the loom content base behind the same
+   `ContentClient` port, so callers do not change.
+3. **Listing gated** — content goes to zeus for a D3 external-action decision, returns
+   423 DECISION_HELD, and only reaches channel upsert/publish after human approval.
+4. **Order pulled back** — the channel returns orders and the order center stores them, keyed
+   by (channel, external_order_id) for idempotency, with SKU codes backfilled and an
+   order.imported event written.
+5. **Refund gated** — refund amounts are computed from order lines only, a D2 decision holds
+   the request; the state machine runs
+   `requested → awaiting_approval → succeeded/rejected`, and the channel refund fires only
+   after approval.
+
+## Channels: a pluggable contract plus an offline sandbox
+
+- A unified five-method `ChannelAdapter` contract (product/order/inventory/aftersale/publish)
+  plus a registry; adding a platform is just implementing and registering an adapter, and
+  unregistered channels fail-closed.
+- M3 registers only the offline `sandbox-douyin`: it replays deterministic recordings in
+  `recordings/sandbox-douyin/fixtures.json` (products, orders, inventory, refunds, content)
+  and **never touches the network or needs credentials**.
+- Live channels (e.g. real Douyin shop) fail-closed until qualifications and credentials
+  exist: registering a live channel requires a `credentialRef`, otherwise 422
+  CREDENTIAL_MISSING.
+
+## Decisions: externalized to zeus
+
+- The repo **never grades locally**. Every amount and external move (listing, refund) goes to
+  the zeus decision kernel (D0–D3) over HTTP via `zeus-client`.
+- Listing is a D3 external action and refund is a D2 money move; both return 423
+  DECISION_HELD and wait for human approval.
+- When zeus is unreachable the system fails closed with 503 DECISION_UNAVAILABLE; no move is
+  ever let through.
+- Tests use `tests/helpers/fake-zeus-server.ts` (a node:http fake zeus) so the real
+  zeus-client exercises the full HTTP path.
+
+## Four engineering guarantees
+
+- **Fail-closed by default**: unregistered channels are refused, live channels without
+  credentials return 422, an unreachable zeus returns 503; no unauthorized move ever happens.
+- **Decisions externalized**: all money and external moves go through zeus, with D3/D2 held
+  pending human approval.
+- **No fake success**: payment/fulfillment explicitly return 501 NOT_IMPLEMENTED_PLACEHOLDER
+  in M3; content is an offline stub, not a model. Placeholders are a stated product stance,
+  not silent mocks.
+- **Idempotent and audited**: orders are deduplicated by (channel, external_order_id) for
+  safe replay; the `commerce_events` table records every key action (decision requests,
+  listings, order imports, refund transitions), matching zeus decision records one to one.
+
+## Nine domain modules
+
+Product center (product), channel adapters (channel), order center (order), decision port
+(decision), publishing orchestration (publishing), after-sale refund state machine
+(aftersale), fulfillment & payment placeholders (fulfillment), audit ledger (audit), and the
+storage layer (storage). The channel, decision and content seams are all port contracts:
+`ChannelAdapter` (five methods), `DecisionPort` (zeus-client), `ContentClient` (M3 stub →
+M4 loom).
+
+## Storage and stack
+
+- Dual dialect: bundled `node:sqlite` with zero dependencies locally, PostgreSQL in
+  production; dialect lives only in the storage layer, sqlite/pg migrations are paired by
+  number and enforced by `check:migrations`.
+- Node ≥ 22, TypeScript strict (noUncheckedIndexedAccess, exactOptionalPropertyTypes), Hono
+  (@hono/node-server), Vitest.
+- HTTP v1 exposes 12 routes with one unified error envelope
+  `{ error: { code, message, retryable, details? } }`.
+
+## GATE-M3 acceptance
+
+The end-to-end test covers one full loop without any external credentials: product
+SKU-DEMO-001 → content stub → D3 listing held → human approval → sandbox upsert + publish
+(listed) → sandbox order pullback (1299 CNY paid, idempotent) → D2 refund held → human
+approval → sandbox refund succeeded; every key node has both commerce_events and zeus
+decision records.
+
+## Intentionally out of scope in M3
+
+- No real Douyin shop or any live channel: requires qualifications and keys
+  (credentialRef → secrets backend).
+- No model key: content is an offline stub (M4 connects the loom content base).
+- No real payment/logistics: payment happens off-platform (orders are already paid on
+  import); fulfillment comes in a later milestone.
+- No multi-tenancy (self-use scope, consistent with zeus).

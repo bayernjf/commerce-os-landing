@@ -1,0 +1,76 @@
+# Commerce OS
+
+> 自营电商最小闭环（Tier0 组合级 M3 里程碑产物）。商品、内容、过决策门的上架、幂等订单
+> 回传与退款状态机构成一条完整闭环；所有金额与外部动作经 HTTP 交给 zeus 决策内核，通道
+> 可插拔、离线沙箱先行、live 一律 fail-closed，没做的功能显式 501、绝不假装成功。
+
+- 站点：https://commerce-os.bayjf.com/zh/（简体中文）· https://commerce-os.bayjf.com（English）
+- 源码：https://github.com/bayernjf/commerce-os
+- 状态：M3 里程碑已交付（GATE-M3 通过），48 个测试全绿；M4 内容由 loom 底座承接。
+
+## 五个工位（完整闭环）
+
+1. **商品建档** —— 类目 + SPU/SKU 商品中心；标题、价格、币种、skuCode 唯一性先校验。
+2. **内容产出** —— M3 是确定性离线内容桩（禁词拦截、单次审核、永不自动确认）；M4 在同一
+   `ContentClient` 端口后换成 loom 内容底座，调用方不变。
+3. **上架过门** —— 内容提交 zeus 做 D3 外部动作决策，先返回 423 DECISION_HELD 挂起，人工
+   审批通过后才调用通道 upsert/publish。
+4. **订单回传** —— 通道回传订单、本地落库，以 (channel, external_order_id) 幂等，回填
+   SKU 编码，写 order.imported 事件。
+5. **退款过门** —— 退款金额只按订单行计算，D2 决策挂起；状态机
+   `requested → awaiting_approval → succeeded/rejected`，审批通过后才真正调用通道退款。
+
+## 通道：可插拔契约 + 离线沙箱
+
+- 统一 `ChannelAdapter` 五方法契约（商品/订单/库存/售后/发布）+ 注册表；新增平台就是加一个
+  适配器并注册，未注册通道 fail-closed。
+- M3 只注册离线 `sandbox-douyin`：回放 `recordings/sandbox-douyin/fixtures.json` 的确定性
+  录制（商品、订单、库存、退款、内容），**不触网、不要凭据**。
+- live 通道（如真实抖店）在资质与密钥到位前一律 fail-closed：注册 live 通道必须带
+  `credentialRef`，否则 422 CREDENTIAL_MISSING。
+
+## 决策：一律外移给 zeus
+
+- 本仓**不做本地分级**。所有金额/外部动作（上架、退款）经 `zeus-client` 走 HTTP 交给
+  zeus 决策内核（D0–D3）。
+- 上架是 D3 外部动作、退款是 D2 金额动作，先 423 DECISION_HELD，等人工审批。
+- zeus 不可达时 fail-closed，返回 503 DECISION_UNAVAILABLE，不会放行任何动作。
+- 测试用 `tests/helpers/fake-zeus-server.ts`（node:http 假 zeus）让真实 zeus-client 走
+  完整 HTTP 链路。
+
+## 四条工程承诺
+
+- **默认熔断**：未注册通道拒绝、live 缺凭据 422、zeus 不可达 503；无法授权的动作绝不发生。
+- **决策外移**：金额与外部动作全部走 zeus，D3/D2 挂起等待人工审批。
+- **不伪造成功**：支付/履约在 M3 显式返回 501 NOT_IMPLEMENTED_PLACEHOLDER；内容是离线桩
+  而非模型。占位是明确的产品口径，不是静默 mock。
+- **幂等留痕**：订单按 (channel, external_order_id) 去重，重放安全；`commerce_events` 表
+  记录全部关键动作（决策请求、上架、订单导入、退款流转），与 zeus decision 记录一一对应。
+
+## 九个领域模块
+
+商品中心（product）、通道适配器（channel）、订单中心（order）、决策端口（decision）、
+上架编排（publishing）、售后退款状态机（aftersale）、履约与支付占位（fulfillment）、
+审计台账（audit），以及存储层（storage）。通道、决策、内容三条缝都是端口契约：
+`ChannelAdapter`（五方法）、`DecisionPort`（zeus-client）、`ContentClient`（M3 桩 → M4 loom）。
+
+## 存储与技术栈
+
+- 双方言：本地用内置 `node:sqlite` 零依赖，生产用 PostgreSQL；方言只在存储层，迁移文件
+  sqlite/pg 按编号配对，由 `check:migrations` 强校验。
+- Node ≥ 22、TypeScript strict（noUncheckedIndexedAccess、exactOptionalPropertyTypes）、
+  Hono（@hono/node-server）、Vitest。
+- HTTP v1 共 12 个路由，统一错误体 `{ error: { code, message, retryable, details? } }`。
+
+## GATE-M3 验收
+
+端到端测试覆盖一条无外部凭据的完整闭环：商品 SKU-DEMO-001 → 内容桩 → 上架 D3 挂起 →
+人工审批 → 沙箱 upsert+发布（listed）→ 沙箱订单回传（1299 CNY 已支付，幂等）→ 退款 D2
+挂起 → 人工审批 → 沙箱退款成功；每个关键节点都有 commerce_events 与 zeus decision 记录。
+
+## M3 有意不做
+
+- 不接真实抖店/任何 live 通道：需要资质与密钥（credentialRef → 密钥后端）。
+- 不接模型 key：内容为离线桩（M4 接 loom 内容底座）。
+- 不做真实支付/物流：支付在平台外部（订单导入时已支付），履约在后续里程碑。
+- 不做多租户（沿用 zeus 自用口径）。
