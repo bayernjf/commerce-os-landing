@@ -1,0 +1,179 @@
+---
+// Cta — self-host deploy terminal
+import { getLangFromUrl, useTranslations } from "../i18n";
+import { SOCIAL } from "../consts";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const cmd = [
+  { c: "# clone + install", run: false },
+  { c: "git clone " + SOCIAL.github + ".git commerce-os", run: true },
+  { c: "cd commerce-os && npm install", run: true },
+  { c: "# migrate the local SQLite store", run: false },
+  { c: "npm run migrate:up", run: true },
+  { c: "# start — http://127.0.0.1:8787", run: false },
+  { c: "npm start", run: true },
+];
+---
+
+<section id="cta">
+  <div class="shell">
+    <div class="panel panel--riveted cta">
+      <div class="panel__bar">
+        <span>{t("cta.bar")}</span>
+        <span class="led" data-c="power" />
+      </div>
+      <div class="cta__body">
+        <div class="cta__copy">
+          <span class="eyebrow">{t("cta.eyebrow")}</span>
+          <h2 class="cta__title">{t("cta.title")}</h2>
+          <p class="cta__sub">{t("cta.sub")}</p>
+          <ul class="cta__list">
+            <li>{t("cta.list1")}</li>
+            <li>{t("cta.list2")}</li>
+            <li>{t("cta.list3")}</li>
+            <li>{t("cta.list4")}</li>
+          </ul>
+          <div class="cta__actions">
+            <a class="btn" href={SOCIAL.github} target="_blank" rel="noopener noreferrer">
+              {t("cta.source")}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="terminal">
+          <div class="terminal__bar">
+            <span class="terminal__dots"><i></i><i></i><i></i></span>
+            <span class="terminal__title">{t("cta.terminal")}</span>
+            <span class="readout terminal__port">:8787</span>
+          </div>
+          <pre class="terminal__body"><code>{
+            cmd.map((line) => (line.run ? `$ ${line.c}` : line.c)).join("\n")
+          }</code></pre>
+        </div>
+      </div>
+      <p class="cta__note">{t("cta.note")}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    overflow: hidden;
+  }
+  .cta__body {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 44px;
+    padding: 40px 40px 36px;
+    min-width: 0;
+  }
+  .cta__body > * { min-width: 0; }
+    background:
+      radial-gradient(ellipse 60% 80% at 85% 20%, rgba(255, 176, 32, 0.06), transparent 70%),
+      var(--steel-850);
+  }
+  .cta__title {
+    margin-top: 12px;
+    font-size: clamp(24px, 3.2vw, 34px);
+  }
+  .cta__sub {
+    margin-top: 16px;
+    max-width: 50ch;
+    color: var(--ink-dim);
+  }
+  .cta__list {
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .cta__list li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: var(--ink-dim);
+  }
+  .cta__list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    background: var(--power);
+    box-shadow: 0 0 8px var(--power);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  .cta__actions {
+    margin-top: 26px;
+  }
+
+  .terminal {
+    align-self: center;
+    border: 1px solid var(--steel-600);
+    background: var(--steel-950);
+    box-shadow: var(--bevel-deep), 0 18px 40px -18px rgba(0, 0, 0, 0.9);
+  }
+  .terminal__bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 13px;
+    border-bottom: 1px solid var(--steel-700);
+    background: var(--steel-850);
+  }
+  .terminal__dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .terminal__dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--steel-600);
+  }
+  .terminal__dots i:first-child { background: var(--alert); }
+  .terminal__dots i:nth-child(2) { background: var(--power); }
+  .terminal__dots i:nth-child(3) { background: var(--ok); }
+  .terminal__title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--ink-faint);
+  }
+  .terminal__port {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--data);
+  }
+  .terminal__body {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+  }
+  .terminal__body code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: var(--ink-dim);
+  }
+  .cta__note {
+    padding: 0 40px 26px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 860px) {
+    .cta__body {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      padding: 26px 22px 24px;
+    }
+    .cta__note { padding: 0 22px 22px; }
+  }
+</style>

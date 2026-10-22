@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hud from "../components/Hud.astro";
+import Hero from "../components/Hero.astro";
+import Loop from "../components/Loop.astro";
+import Modules from "../components/Modules.astro";
+import Gates from "../components/Gates.astro";
+import Stack from "../components/Stack.astro";
+import Cta from "../components/Cta.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+  <Hud />
+  <main>
+    <Hero />
+    <div data-reveal><Loop /></div>
+    <div data-reveal><Modules /></div>
+    <div data-reveal><Gates /></div>
+    <div data-reveal><Stack /></div>
+    <div data-reveal><Cta /></div>
+  </main>
+  <Footer />
+</Layout>
