@@ -1,0 +1,95 @@
+---
+// Modules — the nine domain modules as crated panels
+import { getLangFromUrl, useTranslations, type UIKey } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const mods = [
+  { id: "product", tag: "PRODUCT", accent: "var(--data)", icon: "box" },
+  { id: "content", tag: "CONTENT", accent: "var(--data)", icon: "filetext" },
+  { id: "channel", tag: "CHANNEL", accent: "var(--plasma)", icon: "plug" },
+  { id: "order", tag: "ORDER", accent: "var(--data)", icon: "receipt" },
+  { id: "decision", tag: "DECISION", accent: "var(--power)", icon: "shield" },
+  { id: "publishing", tag: "PUBLISHING", accent: "var(--power)", icon: "upload" },
+  { id: "aftersale", tag: "AFTERSALE", accent: "var(--warn)", icon: "undo" },
+  { id: "fulfillment", tag: "FULFILLMENT", accent: "var(--ink-faint)", icon: "pause" },
+  { id: "audit", tag: "AUDIT", accent: "var(--ok)", icon: "scroll" },
+] as const;
+
+const icons: Record<string, string> = {
+  box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/>',
+  filetext: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  plug: '<path d="M9 2v6M15 2v6M7 8h10v3a5 5 0 0 1-10 0z"/><path d="M12 16v6"/>',
+  receipt: '<path d="M5 3h14v18l-3.5-2-3.5 2-3.5-2L5 21z"/><path d="M9 8h6M9 12h6"/>',
+  shield: '<path d="M12 3l7 3v6c0 4.4-3 7.2-7 9-4-1.8-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  upload: '<path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+  undo: '<path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 0 10h-1"/>',
+  pause: '<rect x="7" y="5" width="4" height="14" rx="1"/><rect x="13" y="5" width="4" height="14" rx="1"/>',
+  scroll: '<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 0 2 2H8a2 2 0 0 1-2-2z"/><path d="M6 4a2 2 0 0 0-2 2v1h4M9 9h7M9 13h7"/>',
+};
+---
+
+<section id="modules">
+  <div class="shell">
+    <span class="stencil">{t("modules.stencil")}</span>
+    <h2 class="h-sec">{t("modules.title")}</h2>
+    <p class="sub-sec">{t("modules.sub")}</p>
+
+    <div class="grid">
+      {mods.map((m) => (
+        <article class="panel mod" style={`--accent:${m.accent}`}>
+          <div class="panel__bar">
+            <span>{m.tag}</span>
+            <span class="mod__pip" aria-hidden="true"></span>
+          </div>
+          <div class="mod__body">
+            <svg class="mod__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" set:html={icons[m.icon]} />
+            <h3 class="mod__title">{t(`modules.${m.id}.name` as UIKey)}</h3>
+            <p class="mod__desc">{t(`modules.${m.id}.desc` as UIKey)}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    margin-top: 44px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .mod { overflow: hidden; }
+  .mod__pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .mod__body {
+    padding: 22px 20px 24px;
+    background: linear-gradient(180deg, var(--steel-850), var(--steel-900));
+  }
+  .mod__icon {
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .mod__title {
+    font-size: 17px;
+  }
+  .mod__desc {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.62;
+    color: var(--ink-dim);
+  }
+
+  @media (max-width: 1080px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>

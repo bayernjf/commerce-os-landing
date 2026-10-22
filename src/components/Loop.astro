@@ -1,0 +1,166 @@
+---
+// Loop — conveyor walkthrough of how one order travels the closed loop
+import { getLangFromUrl, useTranslations, type UIKey } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const steps = [
+  { n: "01", tag: "PRODUCT", accent: "var(--data)", gate: null },
+  { n: "02", tag: "CONTENT", accent: "var(--plasma)", gate: null },
+  { n: "03", tag: "LISTING", accent: "var(--power)", gate: "D3" },
+  { n: "04", tag: "ORDER", accent: "var(--data)", gate: null },
+  { n: "05", tag: "REFUND", accent: "var(--power)", gate: "D2" },
+];
+---
+
+<section id="loop">
+  <div class="shell">
+    <span class="stencil">{t("loop.stencil")}</span>
+    <h2 class="h-sec">{t("loop.title")}</h2>
+    <p class="sub-sec">{t("loop.sub")}</p>
+
+    <ol class="line">
+      {steps.map((s) => (
+        <li class="line__step" style={`--accent:${s.accent}`}>
+          <div class="line__marker">
+            <span class="line__n readout">{s.n}</span>
+            <span class="line__pip" aria-hidden="true"></span>
+            {s.gate && <span class="line__gate">{s.gate} GATE</span>}
+          </div>
+          <div class="line__card">
+            <span class="line__tag">{s.tag}</span>
+            <h3 class="line__title">{t(`loop.${s.n}.title` as UIKey)}</h3>
+            <p class="line__body">{t(`loop.${s.n}.body` as UIKey)}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .line {
+    margin: 48px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+
+  .line__step {
+    position: relative;
+    padding: 0 12px;
+  }
+
+  /* the conveyor rail running behind every step */
+  .line__marker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+  }
+  .line__marker::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: -24px;
+    top: 19px;
+    height: 2px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--steel-500) 0 8px,
+      transparent 8px 14px
+    );
+  }
+  .line__step:last-child .line__marker::before {
+    right: 0;
+  }
+
+  .line__n {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 3px 7px;
+    color: var(--accent);
+    background: var(--steel-900);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 16px -4px var(--accent);
+  }
+
+  .line__gate {
+    position: relative;
+    z-index: 1;
+    margin-left: 2px;
+    padding: 2px 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--power);
+    background: var(--steel-900);
+    border: 1px solid var(--power-dim);
+  }
+
+  .line__pip {
+    position: relative;
+    z-index: 1;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: travel 3.4s linear infinite;
+  }
+  .line__step:nth-child(2) .line__pip { animation-delay: 0.4s; }
+  .line__step:nth-child(3) .line__pip { animation-delay: 0.8s; }
+  .line__step:nth-child(4) .line__pip { animation-delay: 1.2s; }
+  .line__step:nth-child(5) .line__pip { animation-delay: 1.6s; }
+
+  @keyframes travel {
+    0% { transform: translateX(0); opacity: 0; }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { transform: translateX(90px); opacity: 0; }
+  }
+
+  .line__card {
+    margin-top: 18px;
+    padding: 18px 16px 20px;
+    background: linear-gradient(180deg, var(--steel-800), var(--steel-850));
+    border: 1px solid var(--steel-600);
+    border-top: 2px solid var(--accent);
+    box-shadow: var(--bevel);
+    min-height: 200px;
+  }
+  .line__tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .line__title {
+    margin-top: 8px;
+    font-size: 17px;
+  }
+  .line__body {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+
+  @media (max-width: 1000px) {
+    .line {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .line__step { padding: 0; }
+    .line__marker::before { right: 0; }
+    .line__card { min-height: 0; }
+  }
+  @media (max-width: 560px) {
+    .line { grid-template-columns: 1fr; }
+  }
+</style>
