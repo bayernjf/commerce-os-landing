@@ -1,0 +1,161 @@
+---
+// Stack — ports-oriented layering plus the channel/capability status board
+import { getLangFromUrl, useTranslations, type UIKey } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const layers = [
+  { id: "http", tag: "L6" },
+  { id: "compose", tag: "L5" },
+  { id: "domain", tag: "L4" },
+  { id: "ports", tag: "L3" },
+  { id: "storage", tag: "L2" },
+  { id: "runtime", tag: "L1" },
+] as const;
+
+const board = [
+  { id: "sandbox", c: "var(--ok)", code: "ONLINE" },
+  { id: "live", c: "var(--alert)", code: "FAIL-CLOSED" },
+  { id: "content", c: "var(--plasma)", code: "STUB" },
+  { id: "payment", c: "var(--alert)", code: "501" },
+  { id: "decision", c: "var(--ok)", code: "HTTP" },
+] as const;
+---
+
+<section id="stack">
+  <div class="shell">
+    <span class="stencil">{t("stack.stencil")}</span>
+    <h2 class="h-sec">{t("stack.title")}</h2>
+    <p class="sub-sec">{t("stack.sub")}</p>
+
+    <div class="stack">
+      <div class="stack__layers">
+        {[...layers].reverse().map((l) => (
+          <article class="panel layer" style={`--accent:var(--data)`}>
+            <div class="layer__row">
+              <span class="layer__tag readout">{l.tag}</span>
+              <div>
+                <h3 class="layer__title">{t(`stack.layer.${l.id}` as UIKey)}</h3>
+                <p class="layer__desc">{t(`stack.layer.${l.id}Desc` as UIKey)}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <aside class="panel panel--riveted board">
+        <div class="panel__bar">
+          <span>{t("stack.board.title")}</span>
+          <span class="led" data-c="data" aria-hidden="true"></span>
+        </div>
+        <div class="board__body">
+          {board.map((b) => (
+            <div class="board__row" style={`--c:${b.c}`}>
+              <i class="board__dot" aria-hidden="true"></i>
+              <div class="board__text">
+                <span class="board__name">{t(`stack.board.${b.id}` as UIKey)}</span>
+                <span class="board__desc">{t(`stack.board.${b.id}Desc` as UIKey)}</span>
+              </div>
+              <span class="board__code readout">{b.code}</span>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stack {
+    margin-top: 44px;
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .stack > * { min-width: 0; }
+  .stack__layers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .layer {
+    background: linear-gradient(180deg, var(--steel-800), var(--steel-850));
+  }
+  .layer__row {
+    display: flex;
+    gap: 16px;
+    padding: 16px 18px;
+    border-left: 2px solid var(--accent);
+  }
+  .layer__tag {
+    flex: none;
+    font-size: 11px;
+    color: var(--data);
+    padding-top: 3px;
+  }
+  .layer__title {
+    font-size: 15px;
+  }
+  .layer__desc {
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  .board {
+    position: sticky;
+    top: 70px;
+  }
+  .board__body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--steel-900);
+  }
+  .board__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 13px;
+    background: var(--steel-850);
+    border: 1px solid var(--steel-700);
+  }
+  .board__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 9px var(--c);
+  }
+  .board__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .board__name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .board__desc {
+    font-size: 11.5px;
+    color: var(--ink-faint);
+  }
+  .board__code {
+    margin-left: auto;
+    flex: none;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--c);
+  }
+
+  @media (max-width: 960px) {
+    .stack { grid-template-columns: 1fr; }
+    .board { position: static; }
+  }
+</style>

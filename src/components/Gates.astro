@@ -1,0 +1,74 @@
+---
+// Gates — the four fail-closed engineering guarantees
+import { getLangFromUrl, useTranslations, type UIKey } from "../i18n";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+const gates = [
+  { n: "1", tag: "FAIL-CLOSED", accent: "var(--alert)", icon: '<path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M12 8v4M12 15.5h.01"/>' },
+  { n: "2", tag: "DECISION EXTERNALIZED", accent: "var(--power)", icon: '<path d="M4 13h6l2-7 4 12 2-5h2"/>' },
+  { n: "3", tag: "NO FAKE SUCCESS", accent: "var(--warn)", icon: '<path d="M6 6l12 12M18 6L6 18"/><circle cx="12" cy="12" r="9"/>' },
+  { n: "4", tag: "IDEMPOTENT & AUDITED", accent: "var(--ok)", icon: '<path d="M4 6h16M4 12h16M4 18h10"/><path d="M18 15l2 2 4-4"/>' },
+] as const;
+---
+
+<section id="gates">
+  <div class="shell">
+    <span class="stencil">{t("gates.stencil")}</span>
+    <h2 class="h-sec">{t("gates.title")}</h2>
+    <p class="sub-sec">{t("gates.sub")}</p>
+
+    <div class="gates">
+      {gates.map((g) => (
+        <article class="panel gate" style={`--accent:${g.accent}`}>
+          <div class="panel__bar">
+            <span>{g.tag}</span>
+            <span class="readout gate__n">{g.n}</span>
+          </div>
+          <div class="gate__body">
+            <svg class="gate__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" set:html={g.icon} />
+            <h3 class="gate__title">{t(`gates.${g.n}.title` as UIKey)}</h3>
+            <p class="gate__desc">{t(`gates.${g.n}.desc` as UIKey)}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .gates {
+    margin-top: 44px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .gate { overflow: hidden; }
+  .gate__n {
+    color: var(--accent);
+    font-size: 11px;
+  }
+  .gate__body {
+    padding: 26px 24px 28px;
+    background: linear-gradient(180deg, var(--steel-850), var(--steel-900));
+    border-top: 2px solid var(--accent);
+  }
+  .gate__icon {
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .gate__title {
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .gate__desc {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 860px) {
+    .gates { grid-template-columns: 1fr; }
+  }
+</style>
